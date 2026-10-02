@@ -1,26 +1,552 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Ink (Dark) Colors */
+  --ink: #16140f;
+  --ink-soft: #3d3a35;
+  --ink-faint: #8a857d;
+  
+  /* Paper (Light) Colors */
+  --paper: #f5f3ef;
+  --paper-bright: #faf9f7;
+  --paper-warm: #f0ede8;
+  --paper-deep: #e8e4dc;
+  
+  /* Stamp (Red) Colors */
+  --stamp: #a6382c;
+  --stamp-bright: #c4453a;
+  
+  /* Background and Foreground */
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  /* Ink Colors */
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  
+  /* Paper Colors */
+  --color-paper: var(--paper);
+  --color-paper-bright: var(--paper-bright);
+  --color-paper-warm: var(--paper-warm);
+  --color-paper-deep: var(--paper-deep);
+  
+  /* Stamp Colors */
+  --color-stamp: var(--stamp);
+  --color-stamp-bright: var(--stamp-bright);
+  
+  /* Font Families */
+  --font-display: var(--font-caslon-display);
+  --font-text: var(--font-caslon-text);
+  --font-gothic: var(--font-franklin-gothic);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Custom Animations */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+@keyframes sketch {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.5) rotate(-15deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
+  }
+}
+
+/* Reveal Animation Classes */
+.rv {
+  opacity: 0;
+  animation: reveal 0.6s ease-out forwards;
+}
+
+.rv-fade {
+  opacity: 0;
+  animation: reveal 0.4s ease-out forwards;
+}
+
+.rv-settle {
+  opacity: 0;
+  animation: reveal 0.8s ease-out forwards;
+}
+
+.rv-rule {
+  transform: scaleX(0);
+  animation: reveal 0.6s ease-out forwards;
+  transform-origin: left;
+}
+
+.rv-develop {
+  opacity: 0;
+  filter: grayscale(100%);
+  animation: reveal 0.8s ease-out forwards;
+}
+
+.rv-stampchild {
+  opacity: 0;
+  animation: stamp 0.3s ease-out forwards;
+}
+
+.rv-sketch {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: sketch 0.8s ease-out forwards;
+}
+
+/* Dropcap */
+.dropcap::first-letter {
+  font-family: var(--font-caslon-display);
+  font-size: 3.5em;
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.1em;
+  margin-top: 0.1em;
+}
+
+/* Body Styles */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-caslon-text), serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink-faint);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-soft);
+}
+
+/* Selection Color */
+::selection {
+  background: var(--stamp);
+  color: var(--paper);
+}
+
+/* ==================== INTRO ANIMATION ==================== */
+
+/* === OVERLAY (full-screen container) === */
+.fm-intro {
+  z-index: 9999;
+  cursor: none;
+  touch-action: none;
+  background: transparent;
+  transition: opacity 0.45s;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Exit state - triggered by skip or completion */
+.fm-intro--exit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* === NEWSPAPER PAGE BACKGROUND === */
+.fm-zoom {
+  background: var(--paper);
+  position: absolute;
+  inset: 0;
+}
+
+/* === DIM OVERLAY (dark overlay with circular hole at mouse) === */
+.fm-dim {
+  pointer-events: none;
+  z-index: 4;
+  background: rgba(22, 20, 15, 0.85);
+  position: absolute;
+  inset: 0;
+  --mouse-x: -200px;
+  --mouse-y: -200px;
+  -webkit-mask-image: radial-gradient(circle 92px at var(--mouse-x) var(--mouse-y), transparent 94%, black 100%);
+  mask-image: radial-gradient(circle 92px at var(--mouse-x) var(--mouse-y), transparent 94%, black 100%);
+}
+
+/* === GRAIN TEXTURE OVERLAY === */
+.fm-grain {
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  z-index: 5;
+  background-image: radial-gradient(var(--ink) 0.6px, transparent 0.7px);
+  background-size: 3px 3px;
+  position: absolute;
+  inset: 0;
+}
+
+/* === SCENE (newspaper layout container) === */
+.fm-scene {
+  box-sizing: border-box;
+  pointer-events: none;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  padding: 4vh 3vw;
+  display: flex;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* Base state - blurred, reduced opacity (background behind dim) */
+.fm-scene--base {
+  opacity: 0.5;
+  filter: blur(2.6px);
+  transition: opacity 0.5s;
+}
+
+/* Clear state - full opacity, no blur (inside the lens) */
+.fm-scene--clear {
+  opacity: 1;
+  filter: none;
+}
+
+/* === NEWSPAPER COLUMNS === */
+.fm-col {
+  box-sizing: border-box;
+  border-left: 1px solid rgba(22, 20, 15, 0.2);
+  flex-direction: column;
+  flex: 1 1 0;
+  justify-content: center;
+  max-width: 260px;
+  padding: 0 16px;
+  display: flex;
+  overflow: hidden;
+}
+
+.fm-col:first-child {
+  border-left: 0;
+}
+
+/* Column headline */
+.fm-col-h {
+  font-family: var(--font-caslon-display);
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.05;
+}
+
+/* Column separator rule */
+.fm-col-r {
+  background: var(--ink);
+  height: 2px;
+  margin: 0 0 9px;
+}
+
+/* Column line (text placeholder) */
+.fm-col-l {
+  background: rgba(22, 20, 15, 0.42);
+  height: 5px;
+  margin: 7px 0;
+}
+
+/* Short line variant */
+.fm-col-l.s {
+  width: 70%;
+}
+
+/* Extra thick line variant (bold text placeholder) */
+.fm-col-l.x {
+  background: var(--ink);
+  width: 64%;
+  height: 10px;
+  margin: 9px 0;
+}
+
+/* === MASTHEAD (centered "Wanted" card) === */
+.fm-masthead {
+  z-index: 3;
+  text-align: center;
+  background: var(--paper);
+  padding: 14px 34px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.fm-masthead-k {
+  font-family: var(--font-franklin-gothic);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.fm-masthead-t {
+  font-family: var(--font-caslon-display);
+  color: var(--ink);
+  letter-spacing: 0;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.fm-masthead-r {
+  background: var(--ink);
+  width: 80%;
+  height: 2px;
+  margin: 7px auto 0;
+}
+
+/* === MAGNIFYING GLASS (CSS-drawn lens) === */
+.fm-lens {
+  z-index: 6;
+  pointer-events: none;
+  width: 184px;
+  height: 184px;
+  transition: opacity 0.45s;
+  position: fixed;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  will-change: transform;
+}
+
+/* Glass surface with radial gradient for shine effect */
+.fm-lens-glass {
+  background:
+    radial-gradient(circle at 32% 28%, rgba(251, 250, 245, 0.5), rgba(251, 250, 245, 0) 46%),
+    radial-gradient(circle at 70% 78%, rgba(22, 20, 15, 0.06), rgba(22, 20, 15, 0) 40%);
+  border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  box-shadow:
+    0 18px 40px rgba(22, 20, 15, 0.32),
+    inset 0 0 0 1px rgba(22, 20, 15, 0.18);
+  z-index: 4;
+}
+
+/* Metal rim around the lens */
+.fm-lens-rim {
+  border: 7px solid var(--ink);
+  border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  box-shadow:
+    inset 0 0 0 3px var(--paper),
+    inset 0 0 0 4px rgba(22, 20, 15, 0.5);
+  z-index: 3;
+}
+
+/* Handle - exact from reference: bottom -50% right -4% rotate -42deg */
+.fm-lens-handle {
+  transform-origin: top center;
+  background: var(--ink);
+  border-radius: 0 0 8px 8px;
+  width: 40px;
+  height: 76px;
+  position: absolute;
+  top: 50%;
+  right: -4%;
+  bottom: auto;
+  left: auto;
+  transform: rotate(-42deg);
+  transform-origin: top center;
+  box-shadow: inset 2px 0 rgba(251, 250, 245, 0.16);
+  z-index: 2;
+  margin-top: 88px;
+}
+
+/* Gradient glow around lens */
+.fm-lens-glow {
+  position: absolute;
+  inset: -28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,250,245,0.22) 0%, rgba(244,241,233,0.14) 28%, rgba(166,56,44,0.09) 48%, transparent 72%);
+  filter: blur(16px);
+  opacity: 0.9;
+  z-index: 1;
+  pointer-events: none;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%,100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+.fm-lens--wobble .fm-lens-glow {
+  animation: none;
+  filter: blur(20px);
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+/* Zoom-through element - expands from lens center to fill viewport */
+.fm-zoom-circle {
+  position: fixed;
+  width: 184px;
+  height: 184px;
+  border-radius: 50%;
+  background: var(--paper);
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 7;
+  pointer-events: none;
+  will-change: transform, opacity;
+  box-shadow: 0 0 0 8px var(--paper), 0 18px 40px rgba(22,20,15,0.32);
+}
+
+/* Wobble animation when subject is found */
+@keyframes lensWobble {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  15% { transform: translate(-50%, -50%) rotate(-6deg) scale(1.03); }
+  30% { transform: translate(-50%, -50%) rotate(6deg) scale(0.97); }
+  45% { transform: translate(-50%, -50%) rotate(-4deg) scale(1.02); }
+  60% { transform: translate(-50%, -50%) rotate(4deg) scale(0.99); }
+  75% { transform: translate(-50%, -50%) rotate(-2deg) scale(1.01); }
+  100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+}
+
+.fm-lens--wobble {
+  animation: lensWobble 0.55s ease-in-out;
+}
+
+.fm-lens--zooming {
+  transition: none;
+}
+
+/* === HINT TEXT === */
+.fm-hint {
+  z-index: 8;
+  font-family: var(--font-franklin-gothic);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: #45413a;
+  text-align: center;
+  pointer-events: none;
+  font-size: 11px;
+  font-weight: 700;
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+/* === STAMP WRAPPER === */
+.fm-stampwrap {
+  z-index: 7;
+  pointer-events: none;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  position: absolute;
+  inset: 0;
+}
+
+/* === "CONFIRMED" STAMP === */
+.fm-stamp {
+  font-family: var(--font-franklin-gothic);
+  letter-spacing: 0.14em;
+  color: var(--stamp);
+  text-transform: uppercase;
+  white-space: nowrap;
+  filter: url(#fm-rough);
+  background: var(--paper-bright);
+  border: 5px solid var(--stamp);
+  border-radius: 7px;
+  padding: 11px 26px;
+  font-size: clamp(22px, 3.9vw, 46px);
+  font-weight: 900;
+  box-shadow:
+    inset 0 0 0 2px rgba(166, 56, 44, 0.35),
+    0 10px 26px rgba(22, 20, 15, 0.22);
+  animation: stampAppear 0.3s ease-out forwards;
+}
+
+@keyframes stampAppear {
+  from {
+    opacity: 0;
+    transform: scale(1.5) rotate(-15deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
+  }
+}
+
+/* === SKIP BUTTON === */
+.fm-skip {
+  z-index: 9;
+  font-family: var(--font-franklin-gothic);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #45413a;
+  cursor: pointer;
+  background: var(--paper);
+  border: 1px solid rgba(22, 20, 15, 0.4);
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  position: absolute;
+  top: 18px;
+  right: 22px;
+}
+
+.fm-skip:hover {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* === RESPONSIVE (small screens) === */
+@media (max-width: 640px) {
+  .fm-scene { padding: 3vh 5vw; }
+  .fm-col { padding: 0 10px; }
+  .fm-col:nth-child(n+4) { display: none; }
+  .fm-col-h { margin-bottom: 6px; font-size: 13px; }
+  .fm-masthead { padding: 11px 20px; }
+  .fm-masthead-t { font-size: 12px; }
+  .fm-masthead-k { letter-spacing: 0.28em; font-size: 9px; }
+  .fm-hint { bottom: 22px; }
+  .fm-skip { top: 14px; right: 14px; }
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  .fm-intro { display: none; }
 }
